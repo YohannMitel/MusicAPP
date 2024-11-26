@@ -1,7 +1,7 @@
 <template>
   
   <div class="game-container">
-    <RouterLink :to="'/game2'">Next Game</RouterLink>
+    <RouterLink :to="'/game3'">Next Game</RouterLink>
 
     <div :style="{ backgroundColor: signalColor }" class="signal">
       <h2>{{ currentSignal }}</h2>

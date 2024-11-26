@@ -5,7 +5,7 @@
     <RouterView 
       @initHeader="handleDataUpdate" 
       @wsConnect="connectWebSocket" 
-      @wsMsg="">
+      @wsMsg="sendMessage">
     </RouterView>
   </div>
 
@@ -65,11 +65,13 @@ const connectWebSocket = (sessionId_temp) => {
 };
 
 // Fonction pour envoyer un message
-const sendMessage = () => {
+const sendMessage = (message) => {
+  console.log('ICI')
   if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-    const message = `Hello from session ${sessionId.value}`;
-    socket.value.send(JSON.stringify({ type: "message", content: message }));
-    messages.value.push(`Me: ${message}`);
+    console.log('ICI2')
+
+    socket.value.send(message);
+
   }
 };
 

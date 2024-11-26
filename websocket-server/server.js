@@ -39,7 +39,8 @@ wss.on('connection', (ws) => {
     console.log(`Message reçu du client dans la session ${ws.sessionId}: ${message}`);
     sessions[ws.sessionId].forEach(client => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ message, from: ws.sessionId }));
+        console.log(message)
+        client.send(`${message}`);
       }
     });
   });
