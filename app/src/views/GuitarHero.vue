@@ -28,6 +28,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
 
+
+const props = defineProps(["sessionId", "lastMessage"]);
+
+
+
 const audioContext = ref(null);
 const soundButtonText = ref("Enable sound");
 const currentNoteIndex = ref(0);
@@ -176,6 +181,9 @@ const handleKeyDown = (event) => {
     playNoteFromButton(note);
   }
 };
+
+
+
 
 onMounted(() => {
   startGame();

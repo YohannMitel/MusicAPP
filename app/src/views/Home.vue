@@ -77,8 +77,11 @@
         <!-- Colonne droite: Bouton Start -->
         <div class="col-md-4 text-center">
           <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Enter session ID of your connected device"
-              v-model="sessionId" />
+            <input               type="text"
+              class="form-control"
+              placeholder="Enter session ID of your connected device"
+              v-model="sessionId"
+              />
           </div>
           <RouterLink :to="startTheGame()">
             <button @click="playNote();" type="button" class="music-button" :disabled="!sessionId">
@@ -97,7 +100,9 @@ import { ref } from "vue";
 
 const sessionId = ref(""); // Session ID stocké par l'utilisateur
 const audio = new Audio("/audio/start.mp3");
+
 const emits = defineEmits(['initHeader', 'wsConnect'])
+const props = defineProps(["sessionId", "lastMessage"]);
 
 const playNote = () => {
   if (!sessionId.value) return; // Ne joue pas si l'ID de session est vide
@@ -112,7 +117,6 @@ const startTheGame = () => {
   console.log('HERE')
   if (!sessionId.value) return;
   return 'game1'
-  console.log('HERE2')
 
 }
 

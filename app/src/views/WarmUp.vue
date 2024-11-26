@@ -34,11 +34,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import GuitarHero from './GuitarHero.vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+
+
+
 const audioGood = new Audio("/audio/spacebar-click-keyboard.mp3");
 const audioError = new Audio("/audio/error.wav");
+
+
 const emits = defineEmits(['initHeader']);
+const props = defineProps(["sessionId", "lastMessage"]);
 
 const signalColor = ref('red'); // Couleur initiale (rouge)
 const currentSignal = ref('Stop'); // Message du signal
@@ -138,9 +143,11 @@ const randomDuration = () => {
   return Math.floor(Math.random() * 2000) + 1000; // Entre 1 et 3 secondes
 };
 
+
+
 // Démarrage du jeu au montage du composant
 onMounted(() => {
-  emits('initHeader', { pageTitle: 'Warm-up', breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
+  emits('initHeader', { pageTitle: 'Warm-up | SessionID : '+props.sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
   startGame();
 });
 
