@@ -98,11 +98,11 @@
 import { ref } from "vue";
 
 
-const sessionId = ref(""); // Session ID stocké par l'utilisateur
+const sessionId = ref(''); // Session ID stocké par l'utilisateur
 const audio = new Audio("/audio/start.mp3");
 
 const emits = defineEmits(['initHeader', 'wsConnect'])
-const props = defineProps(["sessionId", "lastMessage"]);
+
 
 const playNote = () => {
   if (!sessionId.value) return; // Ne joue pas si l'ID de session est vide
@@ -114,12 +114,9 @@ const playNote = () => {
 };
 
 const startTheGame = () => {
-  console.log('HERE')
-  if (!sessionId.value) return;
-  return 'game1'
-
+  if (!sessionId.value.trim() != '' ) return '';
+  return { name: 'WarmUp',  query: { sessionId: sessionId.value }}
 }
-
 
 
 </script>

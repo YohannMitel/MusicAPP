@@ -1,5 +1,6 @@
 <template>
   <div class="game-container">
+    <RouterLink :to=" { name: 'Chachacha',  query: { sessionId: sessionId }}">Next Game</RouterLink>
     <h1>Piano Hero - Jingle Bells</h1>
     <button @click="enableSound">{{ soundButtonText }}</button>
     <div v-if="!isGameOver" class="signal">
@@ -9,7 +10,7 @@
     <div class="button-container">
       <button @click="playNoteFromButton('MI')" class="note-button blue">MI</button>
       <button @click="playNoteFromButton('RE')" class="note-button red">RE</button>
-      <button @click="playNoteFromButton('DO')" class="note-button yellow">DO</button>
+      <button @click="playNoteFromButton('DO')" class="note-button BLUE">DO</button>
     </div>
 
     <div class="status">
@@ -27,11 +28,15 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
+import { useRoute,useRouter } from 'vue-router';
 
 
-const props = defineProps(["sessionId", "lastMessage"]);
+const emits = defineEmits(['initHeader', 'wsMsg']);
+const props = defineProps(["lastMessage"]);
 
-
+const route = useRoute();
+const router = useRouter();
+const sessionId = route.query.sessionId;
 
 const audioContext = ref(null);
 const soundButtonText = ref("Enable sound");
@@ -44,46 +49,46 @@ const gameStatus = ref('');
 
 const notesSequence = [
   // Première partie de l'Overworld Theme
-  { note: 'E4', duration: 400 },
-  { note: 'E4', duration: 400 },
-  { note: 'E4', duration: 400 },
-  { note: 'C4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'G4', duration: 400 },
-  { note: 'G4', duration: 400 },
-  { note: 'C4', duration: 400 },
-  { note: 'D4', duration: 200 },
-  { note: 'E4', duration: 400 },
+  { signal : 'BLUE' , note: 'E4', duration: 400 },
+  { signal: 'BLUE' , note: 'E4', duration: 400 },
+  { signal: 'BLUE' , note: 'E4', duration: 400 },
+  { signal: 'RED', note: 'C4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 },
+  { signal: 'RED', note: 'C4', duration: 400 },
+  { signal: 'BLUE', note: 'D4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 400 },
   
   // Partie répétitive
-  { note: 'F4', duration: 400 },
-  { note: 'F4', duration: 400 },
-  { note: 'F4', duration: 400 },
-  { note: 'E4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'E4', duration: 400 },
-  { note: 'C4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'G4', duration: 400 },
-  { note: 'G4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 400 },
+  { signal: 'RED', note: 'C4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 },
 
   // Partie finale pour allonger la durée
-  { note: 'C4', duration: 400 },
-  { note: 'D4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'F4', duration: 400 },
-  { note: 'F4', duration: 400 },
-  { note: 'F4', duration: 400 },
-  { note: 'E4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'E4', duration: 400 },
+  { signal: 'RED', note: 'C4', duration: 400 },
+  { signal: 'BLUE', note: 'D4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 400 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 400 },
 
   // Répétition du motif principal pour augmenter la durée
-  { note: 'C4', duration: 200 },
-  { note: 'D4', duration: 200 },
-  { note: 'E4', duration: 200 },
-  { note: 'G4', duration: 400 },
-  { note: 'G4', duration: 400 }
+  { signal: 'RED', note: 'C4', duration: 200 },
+  { signal: 'BLUE', note: 'D4', duration: 200 },
+  { signal: 'BLUE' , note: 'E4', duration: 200 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 },
+  { signal: 'YELLOW', note: 'G4', duration: 400 }
 ];
 const noteToFrequency = {
   C4: noteFrequencies['C4'],
@@ -118,6 +123,7 @@ const playNoteFromButton = (note) => {
       gameOver();
     } else {
       currentNote.value = notesSequence[currentNoteIndex.value].note;
+
     }
   } else {
     gameStatus.value = 'Faux ! Essayez encore.';
@@ -126,9 +132,12 @@ const playNoteFromButton = (note) => {
 
 // Fonction pour jouer automatiquement la séquence
 const playSequence = () => {
+  
   let time = 0;
-  notesSequence.forEach(({ note, duration }) => {
+  notesSequence.forEach(({ signal, note, duration }) => {
     setTimeout(() => {
+      emits('wsMsg', JSON.stringify({ type: "mqtt", color: signal }));
+
       playSound(noteToFrequency[note]);
       currentNote.value = note; // Met à jour la note actuelle affichée
     }, time);
@@ -142,17 +151,20 @@ const playSequence = () => {
 
 const enableSound = () => {
   if (!audioContext.value) {
+
     audioContext.value = new AudioContext();
   }
   audioContext.value
     .resume()
     .then(() => {
       soundButtonText.value = "Sound enabled";
+      startGame();
     })
     .catch((err) => console.error("Error enabling sound:", err));
 };
 
 const startGame = () => {
+
   isGameOver.value = false;
   score.value = 0;
   currentNoteIndex.value = 0;
@@ -186,11 +198,18 @@ const handleKeyDown = (event) => {
 
 
 onMounted(() => {
-  startGame();
+  console.log(sessionId)
+  if (!(sessionId && sessionId.trim() != '')) {
+    //router.push('/');
+    return
+  }
+
+
   window.addEventListener('keydown', handleKeyDown);
 });
 
 onBeforeUnmount(() => {
+  audioContext.value = null
   window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
@@ -241,7 +260,7 @@ onBeforeUnmount(() => {
   background-color: #f44336;
 }
 
-.note-button.yellow {
+.note-button.BLUE {
   background-color: #ffeb3b;
   color: #000;
 }

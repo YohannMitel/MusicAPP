@@ -128,6 +128,7 @@ const restartGame = () => {
 
 // Démarrer le jeu à l'initialisation
 onMounted(() => {
+
   startGame();
 
   window.addEventListener('keydown', playNote);

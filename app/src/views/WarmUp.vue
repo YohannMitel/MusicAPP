@@ -1,17 +1,13 @@
 <template>
-  
+
   <div class="game-container">
-    <RouterLink :to="'/game3'">Next Game</RouterLink>
+    <RouterLink :to="{ name: 'GuitarHero',  query: { sessionId: sessionId }}">Next Game</RouterLink>
 
     <div :style="{ backgroundColor: signalColor }" class="signal">
       <h2>{{ currentSignal }}</h2>
     </div>
 
-    <button 
-      @mousedown="playerPressedButton('down')" 
-      @mouseup="playerPressedButton('up')" 
-      class="press-button"
-    >
+    <button @mousedown="playerPressedButton('down')" @mouseup="playerPressedButton('up')" class="press-button">
       Appuyez maintenant !
     </button>
 
@@ -34,16 +30,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch,computed } from 'vue';
+import { useRoute,useRouter } from 'vue-router';
+
+
 
 
 
 const audioGood = new Audio("/audio/spacebar-click-keyboard.mp3");
 const audioError = new Audio("/audio/error.wav");
 
+const router = useRouter();
+const route = useRoute();
+const sessionId = route.query.sessionId;
 
-const emits = defineEmits(['initHeader']);
-const props = defineProps(["sessionId", "lastMessage"]);
+const emits = defineEmits(['initHeader', 'wsMsg']);
+const props = defineProps([
+  "lastMessage"
+]);
+
+/*
+if (!props.sessionId) {
+  //router.push('/');
+  
+}
+console.log('HEEEEEEEEEERE')
+console.log(props.sessionId);*/
 
 const signalColor = ref('red'); // Couleur initiale (rouge)
 const currentSignal = ref('Stop'); // Message du signal
@@ -79,8 +91,8 @@ const playerPressedButton = (action) => {
 
   if (signalColor.value === 'red') {
     audioError.currentTime = 0;
-    audioError.play(); 
-    pressCount.value -= 1; 
+    audioError.play();
+    pressCount.value -= 1;
     gameStatus.value = 'Erreur ! Ne touchez pas au bouton sur rouge !';
   } else if (signalColor.value === 'yellow') {
     if (action === 'down') {
@@ -98,7 +110,7 @@ const playerPressedButton = (action) => {
   } else if (signalColor.value === 'green') {
     if (action === 'down') {
       audioGood.currentTime = 0;
-      audioGood.play(); 
+      audioGood.play();
       pressCount.value += 1;
       gameStatus.value = 'Bravo pour votre rapidité !';
     }
@@ -107,6 +119,7 @@ const playerPressedButton = (action) => {
 
 // Fonction pour démarrer le jeu
 const startGame = () => {
+  emits('wsMsg', 'startbuttonpress')
   isGameOver.value = false;
   pressCount.value = 0;
   timeRemaining.value = 30;
@@ -147,7 +160,12 @@ const randomDuration = () => {
 
 // Démarrage du jeu au montage du composant
 onMounted(() => {
-  emits('initHeader', { pageTitle: 'Warm-up | SessionID : '+props.sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
+  console.log(sessionId)
+  if (!(sessionId && sessionId.trim() != '')) {
+    router.push('/');
+    return
+  }
+  emits('initHeader', { pageTitle: 'Warm-up | SessionID : ' + sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
   startGame();
 });
 
@@ -158,54 +176,53 @@ onBeforeUnmount(() => {
 });
 </script>
 
-  
-  <style scoped>
-  .game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f0f0f0;
-  }
-  
-  .signal {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 24px;
-    margin-bottom: 20px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .press-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-  }
-  
-  .status {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .restart-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 5px;
-  }
-  </style>
-  
+
+<style scoped>
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.signal {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 24px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.press-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.status {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.restart-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+</style>

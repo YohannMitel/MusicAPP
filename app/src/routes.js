@@ -9,16 +9,16 @@ export const routes = [
 
     },
     {
-        path: '/game1', component: WarmUp,  name:"WarmUp",
+        path: '/game1', component: WarmUp,  name:"WarmUp" , props: true 
 
     },
     {
-        path: '/game2', component: GuitarHero,  name:"GuitarHero",
+        path: '/game2', component: GuitarHero,  name:"GuitarHero", props: true ,
 
     },
     {
-        path: '/game3', component: Chachacha,  name:"Chachacha",
-
+        path: '/game3', component: Chachacha,  name:"Chachacha", props: true 
+ 
     },
     {
         path: '/test', component: c,  name:"s",

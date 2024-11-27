@@ -8,7 +8,7 @@ ws.on('open', function open() {
 
   // Envoi de deux messages
   ws.send('1000'); // Envoi du premier message
-  ws.send('shake'); // Envoi du deuxième message
+  ws.send('startbuttonpress'); // Envoi du deuxième message
 
   console.log('Messages sent!');
 });

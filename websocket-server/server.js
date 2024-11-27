@@ -10,7 +10,7 @@ const sessions = {};
 
 wss.on('connection', (ws) => {
   console.log("Nouveau client connecté.");
-  
+
   // Flag pour vérifier si l'ID de session est défini
   let sessionInitialized = false;
 
@@ -36,13 +36,29 @@ wss.on('connection', (ws) => {
     }
 
     // Une fois l'ID de session défini, diffuser les messages aux autres clients de la même session
-    console.log(`Message reçu du client dans la session ${ws.sessionId}: ${message}`);
+    if(message != '#nodered_serv#'){
+      console.log(`Message reçu du client dans la session ${ws.sessionId}: ${message}`);
+    }
+
+    
     sessions[ws.sessionId].forEach(client => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        console.log(message)
+      if (client !== ws && client.readyState === WebSocket.OPEN ) {
+        
         client.send(`${message}`);
       }
     });
+
+
+    // Envoi du message au client Node-RED, si défini
+    /*console.log(sessions["#nodered_serv#"] )
+    console.log(sessions["#nodered_serv#"].length)*/
+    if ( sessions["#nodered_serv#"] && sessions["#nodered_serv#"].length > 0) {
+      //console.log(`Envoi du message à Node-RED: ${message}`);
+      sessions["#nodered_serv#"][0].send(`${message}`);
+    } else {
+      console.warn("Node-RED non configuré ou sessions manquantes.");
+    }
+
   });
 
   // Gestion de la déconnexion
