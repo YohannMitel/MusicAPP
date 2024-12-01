@@ -1,6 +1,11 @@
 <template>
   <div class="game-container">
-    <RouterLink :to=" { name: 'Chachacha',  query: { sessionId: sessionId }}">Next Game</RouterLink>
+
+    <div class="d-flex flex-row justify-content-between w-100 px-2">
+      <button type="button" class="btn btn-primary">Start</button>
+      <RouterLink  class="btn btn-primary " :to="'/game3'">Next Game</RouterLink>
+    </div>
+
     <h1>Piano Hero - Jingle Bells</h1>
     <button @click="enableSound">{{ soundButtonText }}</button>
     <div v-if="!isGameOver" class="signal">
@@ -10,7 +15,7 @@
     <div class="button-container">
       <button @click="playNoteFromButton('MI')" class="note-button blue">MI</button>
       <button @click="playNoteFromButton('RE')" class="note-button red">RE</button>
-      <button @click="playNoteFromButton('DO')" class="note-button BLUE">DO</button>
+      <button @click="playNoteFromButton('DO')" class="note-button yellow">DO</button>
     </div>
 
     <div class="status">
@@ -22,9 +27,11 @@
       <p>Nombre de points : {{ score }}</p>
       <button @click="restartGame" class="restart-button">Recommencer</button>
     </div>
+    
+
+
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
@@ -219,7 +226,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   height: 100vh;
   background-color: #f0f0f0;
 }
@@ -260,7 +267,7 @@ onBeforeUnmount(() => {
   background-color: #f44336;
 }
 
-.note-button.BLUE {
+.note-button.yellow {
   background-color: #ffeb3b;
   color: #000;
 }

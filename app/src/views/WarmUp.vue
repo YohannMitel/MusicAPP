@@ -1,33 +1,43 @@
 <template>
 
   <div class="game-container">
-    <RouterLink :to="{ name: 'GuitarHero',  query: { sessionId: sessionId }}">Next Game</RouterLink>
 
-    <div :style="{ backgroundColor: signalColor }" class="signal">
-      <h2>{{ currentSignal }}</h2>
+    <div class="d-flex flex-row justify-content-between w-100 px-2">
+      <button type="button" class="btn btn-primary">Start</button>
+      <RouterLink  class="btn btn-primary " :to="'/game2'">Next Game</RouterLink>
     </div>
+    <div class="d-flex flex-column">
+      <div :style="{ backgroundColor: signalColor }" class="signal">
+        <h2>{{ currentSignal }}</h2>
+      </div>
 
-    <button @mousedown="playerPressedButton('down')" @mouseup="playerPressedButton('up')" class="press-button">
-      Appuyez maintenant !
-    </button>
-
-    <div v-if="gameStatus" class="status">
-      <p>{{ gameStatus }}</p>
-    </div>
-
-    <div v-if="timeRemaining > 0" class="timer">
-      <p>Temps restant : {{ timeRemaining }} secondes</p>
-    </div>
-
-    <div v-if="isGameOver" class="scoreboard">
-      <h3>Tableau des scores</h3>
-      <p>Nombre de points : {{ pressCount }}</p>
-      <button @click="restartGame" class="restart-button">
-        Recommencer
+      <button @mousedown="playerPressedButton('down')" @mouseup="playerPressedButton('up')" class="press-button">
+        Appuyez maintenant !
       </button>
+
+
+
+      <div v-if="timeRemaining > 0" class="timer">
+        <p>Temps restant : {{ timeRemaining }} secondes</p>
+      </div>
+
+      <div v-if="isGameOver" class="scoreboard">
+        <h3>Tableau des scores</h3>
+        <p>Nombre de points : {{ pressCount }}</p>
+        <button @click="restartGame" class="restart-button">
+          Recommencer
+        </button>
+      </div>
     </div>
+    <div v-if="gameStatus" class="status">
+        <p>{{ gameStatus }}</p>
+      </div>
+
+
   </div>
+
 </template>
+
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch,computed } from 'vue';
@@ -177,12 +187,14 @@ onBeforeUnmount(() => {
 </script>
 
 
+
+
 <style scoped>
 .game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   height: 100vh;
   background-color: #f0f0f0;
 }

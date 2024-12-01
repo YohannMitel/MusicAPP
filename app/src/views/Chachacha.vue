@@ -1,25 +1,25 @@
 <template>
-  <div id="app">
-    <div class="container-fluid">
-      <!-- Section centrale avec un GIF et de la musique -->
-      <div class="row justify-content-center align-items-center text-center">
-        <div class="col-md-8">
-          <div class="gif-container">
-            <img
-              :src="isPaused ? (lastMessage === 'shaked' ? '/gif/muchachos-statico-f2.png' : '/gif/muchachos-statico-f1.png') : '/gif/muchachos.gif'"
-              alt="muchachachos"
-              class="centered-gif"
-            />
-          </div>
-          <h1 class="mt-4">
-            {{ gameOver ? "Game Over!" : "Shake It!" }}
-          </h1>
-          <button v-if="!gameOver" @click="start()">Start</button>
-          <button v-else @click="start()">Restart</button>
+
+  <div class="container-fluid">
+
+    <div class="d-flex flex-row justify-content-between w-100 px-2">
+      <button type="button"  @click="start()" class="btn btn-primary">Start</button>
+      <RouterLink class="btn btn-primary " :to="'/'">Home</RouterLink>
+    </div>
+    <!-- Section centrale avec un GIF et de la musique -->
+    <div class="row justify-content-center align-items-center text-center">
+      <div class="col-md-8">
+        <div class="gif-container">
+          <img :src="isPaused ? lastMessage == 'shake' ? '/gif/muchachos-statico-f2.png'
+            : '/gif/muchachos-statico-f1.png' : '/gif/muchachos.gif'" alt="muchachachos" class="centered-gif" />
         </div>
+        <h1 class="mt-4">Shake It !</h1>
       </div>
     </div>
   </div>
+
+
+
 </template>
 
 
@@ -85,9 +85,9 @@ const start = () => {
 
 
 <style scoped>
-#app {
+.container-fluid {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   height: 100vh;
   background-color: #dcdcdc;
@@ -96,16 +96,14 @@ const start = () => {
   flex-direction: column;
 }
 
-.container-fluid {
-  text-align: center;
-}
+
 
 .gif-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background-color: #fdfffc;
+  background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

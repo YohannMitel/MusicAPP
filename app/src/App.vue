@@ -1,11 +1,16 @@
 <template>
 
-  <div class="container-fluid overflow-hidden px-0 py-2 h-100">
+<div class="d-flex flex-column px-0 w-100 h-100">
     <PageHeader :pageTitle="pageTitle" :breadcrumbs="breadcrumbs" />
-    <RouterView :lastMessage="lastMessage" :sessionId="sessionId" @initHeader="handleDataUpdate"
-      @wsConnect="connectWebSocket" @wsMsg="sendMessage">
+    <RouterView 
+      :lastMessage="lastMessage"
+      :sessionId="sessionId"
+      @initHeader="handleDataUpdate" 
+      @wsConnect="connectWebSocket" 
+      @wsMsg="sendMessage">
     </RouterView>
   </div>
+
 
 
 </template>
