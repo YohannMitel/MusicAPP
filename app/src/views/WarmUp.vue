@@ -3,8 +3,8 @@
   <div class="game-container">
 
     <div class="d-flex flex-row justify-content-between w-100 px-2">
-      <button type="button" class="btn btn-primary">Start</button>
-      <RouterLink  class="btn btn-primary " :to="'/game2'">Next Game</RouterLink>
+      <button @click="startGame()" type="button" class="btn btn-primary">Start</button>
+      <RouterLink  class="btn btn-primary " :to="{ name: 'GuitarHero',  query: { sessionId: sessionId }}">Next Game</RouterLink>
     </div>
     <div class="d-flex flex-column">
       <div :style="{ backgroundColor: signalColor }" class="signal">
@@ -17,7 +17,7 @@
 
 
 
-      <div v-if="timeRemaining > 0" class="timer">
+      <div v-if="timeRemaining > 0 && isGameStarted" class="timer">
         <p>Temps restant : {{ timeRemaining }} secondes</p>
       </div>
 
@@ -59,17 +59,10 @@ const props = defineProps([
   "lastMessage"
 ]);
 
-/*
-if (!props.sessionId) {
-  //router.push('/');
-  
-}
-console.log('HEEEEEEEEEERE')
-console.log(props.sessionId);*/
-
 const signalColor = ref('red'); // Couleur initiale (rouge)
 const currentSignal = ref('Stop'); // Message du signal
 const isGameOver = ref(false); // État de fin du jeu
+const isGameStarted = ref(false);
 const gameStatus = ref(''); // Message d'état du jeu
 const pressCount = ref(0); // Compteur des points
 const timeRemaining = ref(30); // Temps restant
@@ -99,7 +92,7 @@ const randomizeSignal = () => {
 const playerPressedButton = (action) => {
   if (isGameOver.value) return;
 
-  if (signalColor.value === 'red') {
+  if (signalColor.value === 'red' && action == 'down') {
     audioError.currentTime = 0;
     audioError.play();
     pressCount.value -= 1;
@@ -131,6 +124,7 @@ const playerPressedButton = (action) => {
 const startGame = () => {
   emits('wsMsg', 'startbuttonpress')
   isGameOver.value = false;
+  isGameStarted.value = true;
   pressCount.value = 0;
   timeRemaining.value = 30;
   gameStatus.value = '';
@@ -151,6 +145,7 @@ const endGame = () => {
   clearInterval(intervalId.value);
   clearInterval(timerId.value);
   isGameOver.value = true;
+  isGameStarted.value = false;
   gameStatus.value = 'Le jeu est terminé !';
 };
 
@@ -166,6 +161,14 @@ const randomDuration = () => {
   return Math.floor(Math.random() * 2000) + 1000; // Entre 1 et 3 secondes
 };
 
+// Synchronisez la prop avec la logique de fin de jeu
+watch(
+  () => props.lastMessage, // Surveille les changements de la prop
+  (newValue) => {
+    console.log("lastMessage updated:", newValue);
+    playerPressedButton(newValue)
+  }
+);
 
 
 // Démarrage du jeu au montage du composant
@@ -176,7 +179,6 @@ onMounted(() => {
     return
   }
   emits('initHeader', { pageTitle: 'Warm-up | SessionID : ' + sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
-  startGame();
 });
 
 // Nettoyage à la destruction du composant

@@ -2,20 +2,19 @@
   <div class="game-container">
 
     <div class="d-flex flex-row justify-content-between w-100 px-2">
-      <button type="button" class="btn btn-primary">Start</button>
-      <RouterLink  class="btn btn-primary " :to="'/game3'">Next Game</RouterLink>
+      <button @click="enableSound" type="button" class="btn btn-primary">Start</button>
+      <RouterLink class="btn btn-primary " :to="{ name: 'Chachacha',  query: { sessionId: sessionId }}">Next Game</RouterLink>
     </div>
 
     <h1>Piano Hero - Jingle Bells</h1>
-    <button @click="enableSound">{{ soundButtonText }}</button>
     <div v-if="!isGameOver" class="signal">
-      <h2>{{ currentNote }}</h2>
+      <h2>{{ notesSequenceGame[0]?.signal }}</h2>
     </div>
 
     <div class="button-container">
-      <button @click="playNoteFromButton('MI')" class="note-button blue">MI</button>
-      <button @click="playNoteFromButton('RE')" class="note-button red">RE</button>
-      <button @click="playNoteFromButton('DO')" class="note-button yellow">DO</button>
+      <button @click="playNoteFromButton('BLUE')" class="note-button blue">1</button>
+      <button @click="playNoteFromButton('RED')" class="note-button red">2</button>
+      <button @click="playNoteFromButton('YELLOW')" class="note-button yellow">3</button>
     </div>
 
     <div class="status">
@@ -27,15 +26,15 @@
       <p>Nombre de points : {{ score }}</p>
       <button @click="restartGame" class="restart-button">Recommencer</button>
     </div>
-    
+
 
 
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
-import { useRoute,useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 
 const emits = defineEmits(['initHeader', 'wsMsg']);
@@ -46,56 +45,82 @@ const router = useRouter();
 const sessionId = route.query.sessionId;
 
 const audioContext = ref(null);
-const soundButtonText = ref("Enable sound");
-const currentNoteIndex = ref(0);
-const currentNote = ref('');
+
+
 const score = ref(0);
 const isGameOver = ref(false);
+const isGameStarted = ref(false);
 const gameStatus = ref('');
+
+const notesSequenceGame = ref([]);
+
+
+const noteTimer = (duration, signal) => {
+  emits('wsMsg', JSON.stringify({ type: "mqtt", color: signal }));
+
+  notesSequenceGame.value[0].timer = setTimeout(() => {
+    score.value--
+    console.log('-1')
+
+    notesSequenceGame.value.shift();
+
+    if (notesSequenceGame.value.length == 0) {
+      gameOver()
+
+    } else {
+      const { duration, signal } = notesSequenceGame.value[0];
+      notesSequenceGame.value[0].chrono = noteTimer(duration, signal);
+
+    }
+
+  }
+    , duration
+  )
+}
 
 
 const notesSequence = [
   // Première partie de l'Overworld Theme
-  { signal : 'BLUE' , note: 'E4', duration: 400 },
-  { signal: 'BLUE' , note: 'E4', duration: 400 },
-  { signal: 'BLUE' , note: 'E4', duration: 400 },
-  { signal: 'RED', note: 'C4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 },
-  { signal: 'RED', note: 'C4', duration: 400 },
-  { signal: 'BLUE', note: 'D4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 400 },
-  
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'C4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'C4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'D4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
+
   // Partie répétitive
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 400 },
-  { signal: 'RED', note: 'C4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'C4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null },
 
   // Partie finale pour allonger la durée
-  { signal: 'RED', note: 'C4', duration: 400 },
-  { signal: 'BLUE', note: 'D4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'RED', note: 'F4', duration: 400 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 400 },
+  { signal: 'RED', note: 'C4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'D4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'RED', note: 'F4', duration: 4000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 4000, timer: null },
 
   // Répétition du motif principal pour augmenter la durée
-  { signal: 'RED', note: 'C4', duration: 200 },
-  { signal: 'BLUE', note: 'D4', duration: 200 },
-  { signal: 'BLUE' , note: 'E4', duration: 200 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 },
-  { signal: 'YELLOW', note: 'G4', duration: 400 }
+  { signal: 'RED', note: 'C4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'D4', duration: 2000, timer: null },
+  { signal: 'BLUE', note: 'E4', duration: 2000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null },
+  { signal: 'YELLOW', note: 'G4', duration: 4000, timer: null }
 ];
 const noteToFrequency = {
   C4: noteFrequencies['C4'],
@@ -105,6 +130,7 @@ const noteToFrequency = {
   G4: noteFrequencies['G4'],
   A4: noteFrequencies['A4']
 };
+
 const playSound = (frequency) => {
   const osc = audioContext.value.createOscillator();
   const gain = audioContext.value.createGain();
@@ -119,41 +145,48 @@ const playSound = (frequency) => {
   osc.stop(audioContext.value.currentTime + 1);
 };
 
-const playNoteFromButton = (note) => {
-  if (!isGameOver.value && note === notesSequence[currentNoteIndex.value].note) {
-    playSound(noteToFrequency[note]);
-    currentNoteIndex.value++;
+const playNoteFromButton = (btn) => {
+
+  if (!isGameOver.value && btn === notesSequenceGame.value[0]?.signal) {
+    playSound(noteToFrequency[notesSequenceGame.value[0].note]);
+    console.log('+1')
+    clearTimeout(notesSequenceGame.value[0].timer)
     score.value++;
     gameStatus.value = 'Bien joué ! Continuez.';
+    notesSequenceGame.value.shift()
 
-    if (currentNoteIndex.value >= notesSequence.length) {
-      gameOver();
+    if (notesSequenceGame.value.length == 0) {
+      gameOver()
+
     } else {
-      currentNote.value = notesSequence[currentNoteIndex.value].note;
+      const { duration, signal } = notesSequenceGame.value[0];
+      notesSequenceGame.value[0].chrono = noteTimer(duration, signal);
 
     }
+
   } else {
+    console.log('-1')
+    score.value--
     gameStatus.value = 'Faux ! Essayez encore.';
+
   }
 };
 
 // Fonction pour jouer automatiquement la séquence
 const playSequence = () => {
-  
-  let time = 0;
-  notesSequence.forEach(({ signal, note, duration }) => {
-    setTimeout(() => {
-      emits('wsMsg', JSON.stringify({ type: "mqtt", color: signal }));
-
-      playSound(noteToFrequency[note]);
-      currentNote.value = note; // Met à jour la note actuelle affichée
-    }, time);
-    time += duration;
-  });
-
-  setTimeout(() => {
-    gameOver(); // Fin de la séquence
-  }, time);
+  const { duration, signal } = notesSequenceGame.value[0];
+  notesSequenceGame.value[0].chrono = noteTimer(duration, signal);
+  /* let time = 0;
+   notesSequence.forEach(({ signal, note, duration }) => {
+     setTimeout(() => {
+       
+     }, time);
+     time += duration;
+   });
+ 
+   setTimeout(() => {
+     gameOver(); // Fin de la séquence
+   }, time);*/
 };
 
 const enableSound = () => {
@@ -164,7 +197,6 @@ const enableSound = () => {
   audioContext.value
     .resume()
     .then(() => {
-      soundButtonText.value = "Sound enabled";
       startGame();
     })
     .catch((err) => console.error("Error enabling sound:", err));
@@ -173,15 +205,18 @@ const enableSound = () => {
 const startGame = () => {
 
   isGameOver.value = false;
+  isGameStarted.value = true;
   score.value = 0;
-  currentNoteIndex.value = 0;
-  currentNote.value = notesSequence[0].note;
+
+  notesSequenceGame.value = notesSequence;
+
   gameStatus.value = 'Rejouez la mélodie !';
   playSequence();
 };
 
 const gameOver = () => {
   isGameOver.value = true;
+  isGameStarted.value = false;
   gameStatus.value = 'Bravo ! Vous avez terminé !';
 };
 
@@ -190,14 +225,20 @@ const restartGame = () => {
 };
 
 const handleKeyDown = (event) => {
+
+  if (isGameStarted.value == false) {
+    gameStatus.value = 'You must start the game';
+    return
+  }
   const keyMap = {
-    1: 'MI',
-    2: 'RE',
-    3: 'DO',
+    1: 'BLUE',
+    2: 'RED',
+    3: 'YELLOW',
   };
-  const note = keyMap[event.key];
-  if (note) {
-    playNoteFromButton(note);
+  const btn = keyMap[event.key];
+  //console.log(btn)
+  if (btn) {
+    playNoteFromButton(btn);
   }
 };
 
@@ -206,11 +247,11 @@ const handleKeyDown = (event) => {
 
 onMounted(() => {
   console.log(sessionId)
-  if (!(sessionId && sessionId.trim() != '')) {
-    //router.push('/');
+  /*if (!(sessionId && sessionId.trim() != '')) {
     return
   }
-
+*/
+  emits('initHeader', { pageTitle: 'Guitar-hero | SessionID : ' + sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
 
   window.addEventListener('keydown', handleKeyDown);
 });

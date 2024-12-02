@@ -24,8 +24,8 @@
 
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted, watch, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const audio = new Audio("/audio/chachachas.wav"); // Musique de fond
 const isPaused = ref(true); // Indique si le jeu est en pause
@@ -34,8 +34,9 @@ const gameOver = ref(false); // Indique si le jeu est terminé
 const emits = defineEmits(["initHeader", "wsMsg"]);
 const props = defineProps(["lastMessage"]);
 
-const router = useRoute();
-const sessionId = router.query.sessionId;
+const router = useRouter();
+const route = useRoute();
+const sessionId = route.query.sessionId;
 
 // Fonction appelée à la fin du jeu
 const endGame = () => {
@@ -59,10 +60,10 @@ watch(
 );
 
 onMounted(() => {
-  if (!(sessionId && sessionId.trim() !== "")) {
-    router.push("/");
+  /*if (!(sessionId && sessionId.trim() !== "")) {
+    route.push("/");
     return;
-  }
+  }*/
 
   emits("initHeader", {
     pageTitle: "Chachachas | SessionID : " + sessionId,
@@ -73,7 +74,12 @@ onMounted(() => {
   });
 });
 
+onUnmounted(()=>{
+  endGame();
+})
+
 const start = () => {
+  console.log('START')
   isPaused.value = true;
   gameOver.value = false;
   audio.loop = true; // Activer la boucle pour la musique

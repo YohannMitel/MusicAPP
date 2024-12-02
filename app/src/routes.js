@@ -1,7 +1,6 @@
 import Home from './views/Home.vue'
 import WarmUp from './views/WarmUp.vue'
 import GuitarHero from './views/GuitarHero.vue'
-import c from './views/c.vue'
 import Chachacha from './views/Chachacha.vue'
 export const routes = [
     {
@@ -19,10 +18,6 @@ export const routes = [
     {
         path: '/game3', component: Chachacha,  name:"Chachacha", props: true 
  
-    },
-    {
-        path: '/test', component: c,  name:"s",
-
     }
 
 ]
