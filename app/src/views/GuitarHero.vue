@@ -7,10 +7,11 @@
     </div>
 
     <h1>Piano Hero - Jingle Bells</h1>
+    <!--
     <div v-if="!isGameOver" class="signal">
       <h2>{{ notesSequenceGame[0]?.signal }}</h2>
     </div>
-
+-->
     <div class="button-container">
       <button @click="playNoteFromButton('BLUE')" class="note-button blue">1</button>
       <button @click="playNoteFromButton('RED')" class="note-button red">2</button>
@@ -32,10 +33,12 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, onUnmounted } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
 import { useRoute, useRouter } from 'vue-router';
 
+
+const audioError = new Audio("/audio/error.wav");
 
 const emits = defineEmits(['initHeader', 'wsMsg']);
 const props = defineProps(["lastMessage"]);
@@ -59,6 +62,8 @@ const noteTimer = (duration, signal) => {
   emits('wsMsg', JSON.stringify({ type: "mqtt", color: signal }));
 
   notesSequenceGame.value[0].timer = setTimeout(() => {
+    audioError.currentTime = 0;
+    audioError.play();
     score.value--
     console.log('-1')
 
@@ -165,6 +170,8 @@ const playNoteFromButton = (btn) => {
     }
 
   } else {
+    audioError.currentTime = 0;
+    audioError.play();
     console.log('-1')
     score.value--
     gameStatus.value = 'Faux ! Essayez encore.';
@@ -256,7 +263,8 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
 });
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
+  gameOver();
   audioContext.value = null
   window.removeEventListener('keydown', handleKeyDown);
 });

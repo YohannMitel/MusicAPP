@@ -7,7 +7,7 @@
       <RouterLink  class="btn btn-primary " :to="{ name: 'GuitarHero',  query: { sessionId: sessionId }}">Next Game</RouterLink>
     </div>
     <div class="d-flex flex-column">
-      <div :style="{ backgroundColor: signalColor }" class="signal">
+      <div  :style="{ backgroundColor: signalColor }" class="signal">
         <h2>{{ currentSignal }}</h2>
       </div>
 
@@ -89,7 +89,7 @@ const randomizeSignal = () => {
 };
 
 // Fonction déclenchée quand le joueur appuie sur le bouton
-const playerPressedButton = (action) => {
+const playerPressedButton = async (action) => {
   if (isGameOver.value) return;
 
   if (signalColor.value === 'red' && action == 'down') {

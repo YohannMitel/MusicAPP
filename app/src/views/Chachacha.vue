@@ -10,7 +10,7 @@
     <div class="row justify-content-center align-items-center text-center">
       <div class="col-md-8">
         <div class="gif-container">
-          <img :src="isPaused ? lastMessage == 'shake' ? '/gif/muchachos-statico-f2.png'
+          <img :src="isPaused ? lastMessage == 'shaked' ? '/gif/muchachos-statico-f2.png'
             : '/gif/muchachos-statico-f1.png' : '/gif/muchachos.gif'" alt="muchachachos" class="centered-gif" />
         </div>
         <h1 class="mt-4">Shake It !</h1>
@@ -38,6 +38,37 @@ const router = useRouter();
 const route = useRoute();
 const sessionId = route.query.sessionId;
 
+const noteTimer = (duration, signal) => {
+
+  notesSequenceGame.value[0].timer = setTimeout(() => {
+    audioError.currentTime = 0;
+    audioError.play();
+
+
+    notesSequenceGame.value.shift();
+
+    if (notesSequenceGame.value.length == 0) {
+      gameOver()
+
+    } else {
+      const { duration, signal } = notesSequenceGame.value[0];
+      notesSequenceGame.value[0].chrono = noteTimer(duration, signal);
+
+    }
+
+  }
+    , duration
+  )
+}
+
+const notesSequence = [
+  // Première partie de l'Overworld Theme
+  { signal: 'shake', duration: 700 },
+  { signal: 'stop', duration: 700 },
+  { signal: 'shake', duration: 4000 },
+  { signal: 'stop',  duration: 2500 }
+
+]
 // Fonction appelée à la fin du jeu
 const endGame = () => {
   isPaused.value = false; // Mettre le jeu en pause
