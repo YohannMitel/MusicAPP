@@ -4,34 +4,48 @@
 
     <div class="d-flex flex-row justify-content-between w-100 px-2">
       <button @click="startGame()" type="button" class="btn btn-primary">Start</button>
-      <RouterLink  class="btn btn-primary " :to="{ name: 'GuitarHero',  query: { sessionId: sessionId }}">Next Game</RouterLink>
+      <RouterLink class="btn btn-primary " :to="{ name: 'GuitarHero', query: { sessionId: sessionId } }">Next Game
+      </RouterLink>
     </div>
-    <div class="d-flex flex-column">
-      <div  :style="{ backgroundColor: signalColor }" class="signal">
-        <h2>{{ currentSignal }}</h2>
-      </div>
 
-      <button @mousedown="playerPressedButton('down')" @mouseup="playerPressedButton('up')" class="press-button">
-        Appuyez maintenant !
-      </button>
+    <div class="d-flex flex-column justify-content-center w-100 h-75">
+      <div class="d-flex flex-row w-100 h-100 justify-content-center">
 
-
-
-      <div v-if="timeRemaining > 0 && isGameStarted" class="timer">
-        <p>Temps restant : {{ timeRemaining }} secondes</p>
-      </div>
-
-      <div v-if="isGameOver" class="scoreboard">
-        <h3>Tableau des scores</h3>
-        <p>Nombre de points : {{ pressCount }}</p>
-        <button @click="restartGame" class="restart-button">
-          Recommencer
+        <div v-if="!isGameOver" class="d-flex flex-column">
+          <div :style="{ backgroundColor: signalColor }" class="signal">
+            <h2>{{ currentSignal }}</h2>
+          </div>
+          <div v-if="timeRemaining > 0 && isGameStarted" class="timer">
+            <p>Remaining time : {{ timeRemaining }} seconds</p>
+          </div>
+        </div>
+        <iframe v-if="isGameOver"
+          src="http://192.168.1.68:3900/d-solo/ee5u0bi8ox534a/musicapp-dashboard?orgId=1&from=now-40s&to=now&timezone=browser&theme=light&panelId=3&__feature.dashboardSceneSolo"
+          width="90%" frameborder="0"></iframe>
+        <!--
+        <button @mousedown="playerPressedButton('down')" @mouseup="playerPressedButton('up')" class="press-button">
+          Appuyez maintenant !
         </button>
+
+
+
+        
+
+        <div v-if="isGameOver" class="scoreboard">
+          <h3>Tableau des scores</h3>
+          <p>Nombre de points : {{ score }}</p>
+          <button @click="restartGame" class="restart-button">
+            Recommencer
+          </button>
+        </div>
+        -->
       </div>
+
+
     </div>
-    <div v-if="gameStatus" class="status">
-        <p>{{ gameStatus }}</p>
-      </div>
+    <div v-if="gameStatus && !isGameOver" class="status">
+      <p>{{ gameStatus }}</p>
+    </div>
 
 
   </div>
@@ -40,8 +54,8 @@
 
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch,computed } from 'vue';
-import { useRoute,useRouter } from 'vue-router';
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 
 
@@ -54,7 +68,7 @@ const router = useRouter();
 const route = useRoute();
 const sessionId = route.query.sessionId;
 
-const emits = defineEmits(['initHeader', 'wsMsg']);
+const emits = defineEmits(['initHeader', 'wsMsg','updtScore']);
 const props = defineProps([
   "lastMessage"
 ]);
@@ -64,7 +78,7 @@ const currentSignal = ref('Stop'); // Message du signal
 const isGameOver = ref(false); // État de fin du jeu
 const isGameStarted = ref(false);
 const gameStatus = ref(''); // Message d'état du jeu
-const pressCount = ref(0); // Compteur des points
+const score = ref(0); // Compteur des points
 const timeRemaining = ref(30); // Temps restant
 const timerId = ref(null); // ID du timer principal
 const holdActive = ref(false); // Vérifie si le joueur maintient correctement appuyé
@@ -95,7 +109,7 @@ const playerPressedButton = async (action) => {
   if (signalColor.value === 'red' && action == 'down') {
     audioError.currentTime = 0;
     audioError.play();
-    pressCount.value -= 1;
+    score.value -= 1;
     gameStatus.value = 'Erreur ! Ne touchez pas au bouton sur rouge !';
   } else if (signalColor.value === 'yellow') {
     if (action === 'down') {
@@ -103,7 +117,7 @@ const playerPressedButton = async (action) => {
       gameStatus.value = 'Maintenez le bouton appuyé !';
     } else if (action === 'up') {
       if (holdActive.value) {
-        pressCount.value += 1;
+        score.value += 1;
         gameStatus.value = 'Bien joué pour avoir tenu !';
       } else {
         gameStatus.value = 'Vous n\'avez pas tenu assez longtemps !';
@@ -114,7 +128,7 @@ const playerPressedButton = async (action) => {
     if (action === 'down') {
       audioGood.currentTime = 0;
       audioGood.play();
-      pressCount.value += 1;
+      score.value += 1;
       gameStatus.value = 'Bravo pour votre rapidité !';
     }
   }
@@ -125,7 +139,7 @@ const startGame = () => {
   emits('wsMsg', 'startbuttonpress')
   isGameOver.value = false;
   isGameStarted.value = true;
-  pressCount.value = 0;
+  score.value = 0;
   timeRemaining.value = 30;
   gameStatus.value = '';
   randomizeSignal();
@@ -142,6 +156,7 @@ const startGame = () => {
 
 // Fonction pour arrêter le jeu
 const endGame = () => {
+  emits('updtScore', score.value)
   clearInterval(intervalId.value);
   clearInterval(timerId.value);
   isGameOver.value = true;

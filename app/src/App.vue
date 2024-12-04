@@ -5,6 +5,9 @@
     <RouterView 
       :lastMessage="lastMessage"
       :sessionId="sessionId"
+      :totalScore="totalScore"
+      @updtScore = "updateScore"
+      @rstScore="resetScore"
       @initHeader="handleDataUpdate" 
       @wsConnect="connectWebSocket" 
       @wsMsg="sendMessage">
@@ -31,6 +34,8 @@ const isConnected = ref(false); // Statut de la connexion
 const messages = ref([]); // Historique des messages reçus
 let reconnectTimeout = null; // Timeout pour la reconnexion
 const isReconnecting = ref(false); // État de reconnexion
+
+const totalScore =  ref(0);
 
 // Fonction pour gérer la connexion WebSocket
 const connectWebSocket = (sessionId_temp) => {
@@ -139,4 +144,13 @@ const handleDataUpdate = (newData) => {
   pageTitle.value = newData.pageTitle;
   breadcrumbs.value = newData.breadcrumbs;
 };
+
+const updateScore =  (score) =>{
+  totalScore.value += score;
+}
+
+const resetScore =  () =>{
+  totalScore.value = 0;
+}
+
 </script>

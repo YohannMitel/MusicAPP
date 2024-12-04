@@ -2,6 +2,7 @@ import Home from './views/Home.vue'
 import WarmUp from './views/WarmUp.vue'
 import GuitarHero from './views/GuitarHero.vue'
 import Chachacha from './views/Chachacha.vue'
+import Score from './views/Score.vue'
 export const routes = [
     {
         path: '/', component: Home,  name:"Home",
@@ -17,6 +18,10 @@ export const routes = [
     },
     {
         path: '/game3', component: Chachacha,  name:"Chachacha", props: true 
+ 
+    },
+    {
+        path: '/score', component: Score,  name:"Score", props: true 
  
     }
 

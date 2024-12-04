@@ -27,10 +27,10 @@
                   <div class="accordion-body">
                     In this game, you will interact with a light signal that can be in three different states:
                     <ul>
-                      <li><strong>Red:</strong> This means the game is paused or stopped.</li>
-                      <li><strong>Green:</strong> This indicates you need to get ready.</li>
-                      <li><strong>Flashing Green:</strong> This signals that it's time to press the connected external
-                        button.</li>
+                      <li><strong>Red:</strong> This means you should not click the button.</li>
+                      <li><strong>Yellow:</strong> This signals that it's time to hold the button.</li>
+                      <li><strong>Green:</strong> This indicates you need to click the button as many times as possible.</li>
+
                     </ul>
                   </div>
                 </div>
@@ -95,13 +95,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 
 const sessionId = ref(''); // Session ID stocké par l'utilisateur
 const audio = new Audio("/audio/start.mp3");
 
-const emits = defineEmits(['initHeader', 'wsConnect'])
+const emits = defineEmits(['initHeader', 'wsConnect', 'rstScore'])
 
 
 const playNote = () => {
@@ -118,6 +118,9 @@ const startTheGame = () => {
   return { name: 'WarmUp',  query: { sessionId: sessionId.value }}
 }
 
+onMounted(()=>{
+  emits('rstScore')
+})
 
 </script>
 

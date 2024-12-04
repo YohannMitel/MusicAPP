@@ -21,26 +21,26 @@
     <div class="status">
       <p>{{ gameStatus }}</p>
     </div>
-
+<!--
     <div v-if="isGameOver" class="scoreboard">
       <h3>Tableau des scores</h3>
       <p>Nombre de points : {{ score }}</p>
       <button @click="restartGame" class="restart-button">Recommencer</button>
     </div>
-
+-->
 
 
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { noteFrequencies } from '../utils/noteFrequencies.js';
 import { useRoute, useRouter } from 'vue-router';
 
 
 const audioError = new Audio("/audio/error.wav");
 
-const emits = defineEmits(['initHeader', 'wsMsg']);
+const emits = defineEmits(['initHeader', 'wsMsg', 'updtScore']);
 const props = defineProps(["lastMessage"]);
 
 const route = useRoute();
@@ -222,9 +222,10 @@ const startGame = () => {
 };
 
 const gameOver = () => {
+  emits('updtScore', score.value)
   isGameOver.value = true;
   isGameStarted.value = false;
-  gameStatus.value = 'Bravo ! Vous avez terminé !';
+  gameStatus.value = 'Go to the next game';
 };
 
 const restartGame = () => {
@@ -254,16 +255,18 @@ const handleKeyDown = (event) => {
 
 onMounted(() => {
   console.log(sessionId)
-  /*if (!(sessionId && sessionId.trim() != '')) {
-    return
+  if (!(sessionId && sessionId.trim() != '')) {
+    router.push("/");
+    return;
   }
-*/
+
   emits('initHeader', { pageTitle: 'Guitar-hero | SessionID : ' + sessionId, breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Warm-up', url: '' }] });
 
   window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
+  notesSequenceGame.value.forEach((el)=>{clearTimeout(el.timer)})
   gameOver();
   audioContext.value = null
   window.removeEventListener('keydown', handleKeyDown);
